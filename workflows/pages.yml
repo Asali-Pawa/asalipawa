@@ -1,0 +1,35 @@
+name: Deploy to GitHub Pages via Self-Hosted Runner
+
+on:
+  push:
+    branches: ["main"] # Or whatever your default branch name is
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # 
+    runs-on: self-hosted   # <--- Tells your private GitHub server to handle the build locally
+    #
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Upload Artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.' # If it's a plain HTML project, leave as '.'. If it builds to a folder, use './dist' or './build'
+
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
